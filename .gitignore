@@ -1,2 +1,5 @@
 data
 bindata.go
+server.key
+tmp
+certs
