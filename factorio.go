@@ -9,22 +9,27 @@ import (
 
 	rcon "github.com/gtaylor/factorio-rcon"
 	"golang.org/x/crypto/acme/autocert"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
-var (
-	rconServerAddress  = os.Getenv("RCON_SERVER_ADDRESS")
-	rconServerPassword = os.Getenv("RCON_SERVER_PASSWORD")
-	serverAddress      = os.Getenv("SERVER_ADDRESS")
-)
+type specification struct {
+	RconServerAddress  string   `split_words:"true"`
+	RconServerPassword string   `split_words:"true"`
+	ServerAddress      string   `split_words:"true"`
+	CertHostWhitelist  []string `split_words:"true"`
+}
 
 func main() {
 	log.SetFlags(0)
+	var s specification
+	err := envconfig.Process("factorcon", &s)
 
-	rconClient, err := rcon.Dial(rconServerAddress)
+	rconClient, err := rcon.Dial(s.RconServerAddress)
 	if err != nil {
 		panic(err)
 	}
-	err = rconClient.Authenticate(rconServerPassword)
+	err = rconClient.Authenticate(s.RconServerPassword)
 	if err != nil {
 		panic(err)
 	}
@@ -56,11 +61,11 @@ func main() {
 		m := &autocert.Manager{
 			Cache:      autocert.DirCache("certs"),
 			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist("peterczibik.name"),
+			HostPolicy: autocert.HostWhitelist(s.CertHostWhitelist...),
 		}
 
 		s := &http.Server{
-			Addr: "peterczibik.name",
+			Addr: s.ServerAddress,
 			TLSConfig: &tls.Config{
 				GetCertificate: m.GetCertificate,
 			},
@@ -69,7 +74,7 @@ func main() {
 		s.ListenAndServeTLS("", "")
 	} else {
 		s := &http.Server{
-			Addr: "127.0.0.1:8080",
+			Addr: s.ServerAddress,
 		}
 		s.ListenAndServe()
 	}
