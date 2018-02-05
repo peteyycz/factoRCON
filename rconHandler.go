@@ -7,6 +7,7 @@ import (
 	rcon "github.com/gtaylor/factorio-rcon"
 )
 
+// RCONHandler encapsulates the rcon.RCON client for handling commands
 type RCONHandler struct {
 	client *rcon.RCON
 }

@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/gtaylor/factorio-rcon"
+	rcon "github.com/gtaylor/factorio-rcon"
 	"golang.org/x/crypto/acme/autocert"
 )
 
